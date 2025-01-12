@@ -5,17 +5,21 @@ export default {
   ],
   theme: {
     extend: {
-      colors: {
-        blue: {
-          100: "#ebf8ff",
-          600: "#3182ce",
+      keyframes: {
+        "accordion-down": {
+          from: { height: 0 },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        green: {
-          100: "#f0fff4",
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: 0 },
         },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
-  plugins: [],
+  plugins: [import ("tailwindcss-animate")],
 };
-

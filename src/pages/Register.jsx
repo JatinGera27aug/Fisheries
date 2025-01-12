@@ -1,133 +1,124 @@
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
+import { auth, db } from "../firebaseConfig";
+import { setDoc, doc } from "firebase/firestore";
+import { toast } from "react-toastify";
+import { Alert } from "react-bootstrap";
 
-const Register = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
+function Register() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fname, setFname] = useState("");
+  const [lname, setLname] = useState("");
+  const [error, setError] = useState("");
+  const [userType, setUserType] = useState("user"); // Default to 'user'
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Add your API call or logic here
+    setError("")
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      const user = auth.currentUser;
+      console.log(user);
+      if (user) {
+        await setDoc(doc(db, "Users", user.uid), {
+          email: user.email,
+          firstName: fname,
+          lastName: lname,
+          userType, // Save the userType in Firestore
+          // photo:""
+        });
+      }
+      const token = await user.getIdToken();
+      console.log("Setting token:", token);
+      localStorage.setItem("token", token);
+      console.log("User Registered Successfully!!");
+      localStorage.setItem("userType", userType);
+      if (userType === "admin") {
+        console.log("Redirecting to dashboard...");
+        window.location.href = "/dashboard";
+      } else {
+        console.log("Redirecting to profile...");
+        window.location.href = "/profile";
+      }
+    } catch (error) {
+      setError(error.message);
+      console.log(error.message);
+      toast.error(error.message, {
+        position: "top-center",
+      });
+    }
   };
 
   return (
-    <div
-      className="flex items-center justify-center min-h-screen"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1567005328098-64b0e4aa3d97?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="container-shadow w-full max-w-lg p-8 bg-white bg-opacity-90 shadow-lg rounded-xl">
-        <h2 className="text-center my-3" style={{ color: "#2c7a7b" }}>
-          Sign up here
-        </h2>
-        <div className="col-md-12 my-3 d-flex items-center justify-content-center">
-          <div className="row">
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label
-                  htmlFor="username"
-                  className="form-label"
-                  style={{ color: "#2d3748" }}
-                >
-                  Name
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="form-control"
-                  id="username"
-                  placeholder="Enter your name"
-                  required
-                  style={{
-                    borderColor: "#cbd5e0",
-                    backgroundColor: "#edf2f7",
-                  }}
-                />
-              </div>
-              <div className="mb-3">
-                <label
-                  htmlFor="email"
-                  className="form-label"
-                  style={{ color: "#2d3748" }}
-                >
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="form-control"
-                  id="email"
-                  placeholder="Enter your email"
-                  required
-                  style={{
-                    borderColor: "#cbd5e0",
-                    backgroundColor: "#edf2f7",
-                  }}
-                />
-              </div>
-              <div className="mb-3">
-                <label
-                  htmlFor="password"
-                  className="form-label"
-                  style={{ color: "#2d3748" }}
-                >
-                  Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="form-control"
-                  id="password"
-                  placeholder="Enter your password"
-                  required
-                  style={{
-                    borderColor: "#cbd5e0",
-                    backgroundColor: "#edf2f7",
-                  }}
-                />
-              </div>
-              <div className="mb-3">
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-block"
-                  style={{
-                    backgroundColor: "#2c7a7b",
-                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                  }}
-                >
-                  Sign Up
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-        <p className="mt-6 text-sm text-center text-gray-600">
-          Already have an account?{" "}
-          <a href="/login" className="font-medium" style={{ color: "#2c7a7b" }}>
-            Login
-          </a>
-        </p>
+    <form onSubmit={handleRegister}>
+      <h3>Sign Up</h3>
+      {error && <Alert variant="danger">{error}</Alert>}
+      <div className="mb-3">
+        <label>First name</label>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="First name"
+          onChange={(e) => setFname(e.target.value)}
+          required
+        />
       </div>
-    </div>
-  );
-};
 
+      <div className="mb-3">
+        <label>Last name</label>
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Last name"
+          onChange={(e) => setLname(e.target.value)}
+        />
+      </div>
+
+      <div className="mb-3">
+        <label>Email address</label>
+        <input
+          type="email"
+          className="form-control"
+          placeholder="Enter email"
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-3">
+        <label>Password</label>
+        <input
+          type="password"
+          className="form-control"
+          placeholder="Enter password"
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="mb-3">
+        <label>User Type</label>
+        <select
+          className="form-control"
+          onChange={(e) => setUserType(e.target.value)}
+          required
+        >
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+
+      <div className="d-grid">
+        <button type="submit" className="btn btn-primary">
+          Sign Up
+        </button>
+      </div>
+      <p className="forgot-password text-right">
+        Already registered <a href="/login">Login</a>
+      </p>
+    </form>
+  );
+}
 export default Register;
