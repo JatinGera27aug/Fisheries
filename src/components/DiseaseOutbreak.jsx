@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
     Card, 
     CardContent, 
@@ -22,6 +23,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const DiseaseOutbreakDashboard = () => {
+    const navigate = useNavigate();
     const [diseaseOutbreakData, setDiseaseOutbreakData] = useState([]);
     const [locations, setLocations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState('all');
@@ -105,7 +107,6 @@ const DiseaseOutbreakDashboard = () => {
         setSelectedLocation('all');
         setTimeRange('30d');
     };
-
     return (
         <div className="space-y-6">
             {/* Filters Section */}
@@ -154,6 +155,14 @@ const DiseaseOutbreakDashboard = () => {
                     </Button>
                 </div>
             </div>
+                            {/* New Button to Add Disease Outbreak */}
+                <Button 
+                    variant="default" 
+                    onClick={() => navigate('/add-disease-outbreak')}
+                >
+                    Add New Disease Outbreak
+                </Button>
+
 
             {/* Severity Distribution Chart */}
             <Card className="mb-8 bg-white shadow-md">

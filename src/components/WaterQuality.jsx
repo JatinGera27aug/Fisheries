@@ -59,7 +59,7 @@ const WaterQualityDashboard = () => {
     const [error, setError] = useState(null);
     const [selectedLocation, setSelectedLocation] = useState('all');
     const [locations, setLocations] = useState([]);
-    const [timeRange, setTimeRange] = useState('24h'); // '24h', '7d', '30d'
+    const [timeRange, setTimeRange] = useState('7d'); // '24h', '7d', '30d'
     // Move fetchWaterQualityData and fetchLocations to the top of the component
 
     const fetchLocations = useCallback(async () => {

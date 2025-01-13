@@ -1,71 +1,100 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from "./utils/AuthContext.jsx";
+import ProtectedRoute from './services/ProtectedRoute.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
+
+// Import all pages and components
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Register from './pages/Register.jsx';
 import Profile from './pages/Profile.jsx';
-import ProtectedRoute from './services/ProtectedRoute.jsx';
-import { AuthProvider } from "./utils/AuthContext.jsx";
 import WaterQualityDashboard from './components/WaterQuality.jsx';
-import ErrorBoundary from './components/ErrorBoundary.jsx';
 import AddWaterQualityPage from './pages/AddWaterQualityPage';
 import DiseaseOutbreakDashboard from './components/DiseaseOutbreak.jsx';
 import AddDiseaseOutbreakForm from './components/AddDiseaseOutbreak.jsx';
-
+import PerformanceMetrics from './pages/PerformanceMetrics.jsx';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Public routes */}
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Register />} />
-          <Route path="/water-quality" element={<ErrorBoundary><WaterQualityDashboard /> </ErrorBoundary>} />
+
+          {/* Admin Protected Water Quality Routes */}
           <Route 
-                    path="/add-water-quality" 
-                    element={
-                       
-                            <AddWaterQualityPage />
-                        
-                    } 
-                />
+            path="/water-quality" 
+            element={
+              <ProtectedRoute requiredUserType="water_quality">
+                <ErrorBoundary>
+                  <WaterQualityDashboard />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/add-water-quality" 
+            element={
+              <ProtectedRoute requiredUserType="add_water_quality">
+                <AddWaterQualityPage />
+              </ProtectedRoute>
+            } 
+          />
 
-                 {/* Disease Outbreak Routes */}
-                 <Route 
-                    path="/disease-outbreak" 
-                    element={
-                       
-                            <DiseaseOutbreakDashboard />
-                        
-                    } 
-                />
-                <Route 
-                    path="/add-disease-outbreak" 
-                    element={
-                        
-                            <AddDiseaseOutbreakForm />
-                        
-                    } 
-                />
+          {/* Admin Protected Disease Outbreak Routes */}
+          <Route 
+            path="/disease-outbreak" 
+            element={
+              <ProtectedRoute requiredUserType="disease_outbreak">
+                <ErrorBoundary>
+                  <DiseaseOutbreakDashboard />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/add-disease-outbreak" 
+            element={
+              <ProtectedRoute requiredUserType="add_disease_outbreak">
+                <AddDiseaseOutbreakForm />
+              </ProtectedRoute>
+            } 
+          />
 
-          {/* Protected routes */}
+          {/* Admin Protected Performance Metrics Route */}
+          <Route 
+            path="/performance-metrics" 
+            element={
+              <ProtectedRoute requiredUserType="performance_metrics">
+                <PerformanceMetrics />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* User Protected Profile Route */}
           <Route 
             path="/profile" 
             element={
-              <ProtectedRoute requiredUserType="user">
+              <ProtectedRoute requiredUserType="profile">
                 <Profile />
               </ProtectedRoute>
             } 
           />
           
+          {/* Admin Protected Dashboard Route */}
           <Route 
             path="/dashboard" 
             element={
-              <ProtectedRoute requiredUserType="admin">
+              <ProtectedRoute requiredUserType="dashboard">
                 <Dashboard />
               </ProtectedRoute>
             } 
           />
+
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
